@@ -2,7 +2,7 @@ import torch
 import numpy as np
 from GPT2 import GPT2Model, GPT2Tokenizer
 
-device = 'cpu' #'cuda'
+device = 'cuda' #'cuda'
 
 model = GPT2Model(
     vocab_size=30000,
@@ -14,7 +14,7 @@ model = GPT2Model(
     attention_dropout=0.0,
     residual_dropout=0.0)
 
-state_dict = torch.load('save.pth', map_location='cpu')
+state_dict = torch.load('cpm-1gpu.pth', map_location='cuda')
 
 model.load_state_dict(state_dict)
 model.to(device)
@@ -42,30 +42,9 @@ def sample(text, max_len=10):
         out.append(nid)
     print(tokenizer.decode(out))
 
-def ask_question(question, max_len=10):
-    sample('''问题：中国的首都是哪里？
-    答案：北京。
-    问题：李白在哪个朝代？
-    答案：唐朝。
-    问题：%s
-    答案：''' % question, max_len)
-
-def dictation_poetry(front, max_len=10):
-    sample('''默写古诗:
-    白日依山尽，黄河入海流。
-    %s，''' % front, max_len)
-
-def math(inputs, max_len=10):
-    sample('''1+1=2
-    2+2=4
-    %s''' % inputs, max_len)
-
-ask_question('红楼梦谁写的？')
-
-ask_question('美国的首都是哪里？')
-
-dictation_poetry('床前明月光')
-
-dictation_poetry('沉舟侧畔千帆过')
-
-math('4+4=')
+while True:
+    try:
+        text = input("输入文本: ")
+        sample(text, max_len = 200)
+    except:
+        break

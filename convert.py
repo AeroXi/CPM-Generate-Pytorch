@@ -2,15 +2,15 @@ import os
 import torch
 import numpy as np
 
-m0 = torch.load('./model-v1/80000/mp_rank_00_model_states.pt', map_location='cpu')
-m1 = torch.load('./model-v1/80000/mp_rank_01_model_states.pt', map_location='cpu')
+m0 = torch.load('./CPM-large/80000/mp_rank_00_model_states.pt', map_location='cuda')
+m1 = torch.load('./CPM-large/80000/mp_rank_01_model_states.pt', map_location='cuda')
 
 if not os.path.exists('numpy'):
     os.mkdir('numpy')
 for x, y in zip(m0['module'].items(),  m1['module'].items()):
     n0, p0 = x
     n1, p1 = y
-    if not (p0.numpy()==p1.numpy()).all():
+    if not (p0.cpu().numpy()==p1.cpu().numpy()).all():
         if 'attention.query_key_value.weight' in n0:
             w1 = torch.cat([p0[:1280, :], p1[:1280, :]], dim=0).transpose(1, 0)
             w2 = torch.cat([p0[1280:1280*2, :], p1[1280:1280*2, :]], dim=0).transpose(1, 0)
@@ -39,4 +39,4 @@ for x, y in zip(m0['module'].items(),  m1['module'].items()):
         p =  p0
     m0['module'][n0]=p
 
-torch.save(m0['module'], 'save.pth')
+torch.save(m0['module'], 'cpm-1gpu.pth')
